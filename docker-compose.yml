@@ -14,4 +14,6 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - ADMIN_EMAIL=admin@example.com
+      - ADMIN_PASSWORD=dein_sicheres_passwort
     restart: always

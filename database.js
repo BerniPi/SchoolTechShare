@@ -1,5 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const bcrypt = require('bcrypt');
 
 const dbPath = path.resolve(__dirname, 'database.sqlite');
 const db = new sqlite3.Database(dbPath, (err) => {
@@ -106,9 +107,15 @@ function initializeDb() {
             )
         `);
 
-        // Seeding initial data is now disabled to prevent recreation of test schools
-        // db.run(`INSERT OR IGNORE INTO schools (school_id, school_code, name) VALUES (1, 'SCH001', 'Test School')`);
-        // db.run(`INSERT OR IGNORE INTO users (user_id, email, password_hash, name, role, school_id) VALUES (1, 'admin@test.com', '$2b$10$fxNHn1PX3JtRNqpg/BLEzuJ6WwIRIhrmpIVtCumdcS54tuHgEOeVO', 'Admin User', 'admin', 1)`);
+        // Seeding initial data via environment variables
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@test.com';
+        const adminPassword = process.env.ADMIN_PASSWORD;
+
+        if (adminPassword) {
+            const hash = bcrypt.hashSync(adminPassword, 10);
+            db.run(`INSERT OR IGNORE INTO users (email, password_hash, name, role) VALUES (?, ?, ?, ?)`, 
+                [adminEmail, hash, 'Administrator', 'admin']);
+        }
 
         // Predefined tags seeding is now disabled to respect manual deletions
         /*
