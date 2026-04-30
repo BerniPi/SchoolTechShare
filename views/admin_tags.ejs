@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tags verwalten - SchoolTechShare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+    <%- include('partials/navbar', { activePage: 'tags' }) %>
+
+    <main class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Add Tag Form -->
+            <div class="w-full md:w-1/3">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden sticky top-10">
+                    <div class="bg-indigo-600 py-4 px-6">
+                        <h2 class="text-lg font-bold text-white">Neuen Tag hinzufügen</h2>
+                    </div>
+
+                    <div class="p-6">
+                        <% if (error) { %>
+                            <div class="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+                                <%= error %>
+                            </div>
+                        <% } %>
+
+                        <form action="/admin/tags" method="POST" class="space-y-4">
+                            <div>
+                                <label for="name" class="block text-sm font-semibold text-gray-700">Tag-Name</label>
+                                <input type="text" name="name" id="name" required
+                                    placeholder="z.B. Grafikkarte"
+                                    class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+
+                            <div class="pt-2">
+                                <button type="submit"
+                                    class="w-full flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
+                                    Tag speichern
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tags List -->
+            <div class="w-full md:w-2/3">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-gray-900">Aktive Hardware-Tags</h2>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                            <%= tags.length %> Tags
+                        </span>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <% if (tags && tags.length > 0) { %>
+                                <% tags.forEach(function(tag) { %>
+                                    <div class="flex justify-between items-center p-3 bg-gray-50 border border-gray-200 rounded-lg group hover:bg-white hover:border-indigo-200 transition-all">
+                                        <span class="font-medium text-gray-700"><%= tag.name %></span>
+                                        
+                                        <form action="/admin/tags/<%= tag.tag_id %>/delete" method="POST" class="inline" onsubmit="return confirm('Möchten Sie diesen Tag wirklich löschen? Dies kann Auswirkungen auf bestehende Inserate haben.');">
+                                            <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 p-1">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="col-span-full py-10 text-center text-gray-500 italic">
+                                    Keine Tags vorhanden.
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= currentType === 'offer' ? 'Angebote' : 'Suche' %> - SchoolTechShare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+    <%- include('partials/navbar', { activePage: currentType === 'offer' ? 'offers' : 'requests' }) %>
+
+    <main class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
+                <%= currentType === 'offer' ? 'Hardware-Angebote' : 'Hardware-Suchen' %>
+            </h1>
+            
+            <div class="flex items-center gap-3">
+                <div class="flex bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                    <button onclick="setView('grid')" id="btnGrid" class="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-50 transition-colors" title="Kachelansicht">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    </button>
+                    <button onclick="setView('table')" id="btnTable" class="px-3 py-2 bg-white text-gray-400 hover:bg-gray-50 transition-colors border-l border-gray-200" title="Listenansicht">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                    </button>
+                </div>
+                <a href="/listings/new" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg shadow-md text-white bg-indigo-600 hover:bg-indigo-700 transition-all uppercase tracking-wider">
+                    Neues Inserat
+                </a>
+            </div>
+        </div>
+
+        <!-- Search & Quick Filters -->
+        <% const baseUrl = currentType === 'offer' ? '/offers' : '/requests'; %>
+        <div class="mb-6 flex flex-col lg:flex-row gap-4 items-end">
+            <!-- Full-text Search -->
+            <div class="flex-grow w-full">
+                <form action="<%= baseUrl %>" method="GET" class="relative">
+                    <input type="text" name="q" value="<%= q || '' %>" placeholder="<%= currentType === 'offer' ? 'Angebote durchsuchen...' : 'Gesuche durchsuchen...' %>" class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 pl-10 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                    <div class="absolute left-3 top-3.5 text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <% if (selectedTag) { %> <input type="hidden" name="tag" value="<%= selectedTag %>"> <% } %>
+                    <% if (selectedCondition) { %> <input type="hidden" name="condition" value="<%= selectedCondition %>"> <% } %>
+                    <% if (selectedManufacturer) { %> <input type="hidden" name="manufacturer" value="<%= selectedManufacturer %>"> <% } %>
+                    <% if (showResolved) { %> <input type="hidden" name="show_resolved" value="true"> <% } %>
+                </form>
+            </div>
+            
+            <!-- Quick Filters Row -->
+            <div class="flex shrink-0 gap-3 w-full lg:w-auto">
+                 <form action="<%= baseUrl %>" method="GET" class="flex-grow lg:flex-grow-0 flex items-center bg-white border border-gray-200 px-4 py-2.5 rounded-xl shadow-sm">
+                    <label class="flex items-center text-sm text-gray-700 cursor-pointer hover:text-indigo-600 transition-colors w-full">
+                        <input type="checkbox" name="show_resolved" value="true" class="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500" onchange="this.form.submit()" <%= showResolved ? 'checked' : '' %>>
+                        <% if (q) { %> <input type="hidden" name="q" value="<%= q %>"> <% } %>
+                        <% if (selectedTag) { %> <input type="hidden" name="tag" value="<%= selectedTag %>"> <% } %>
+                        <% if (selectedCondition) { %> <input type="hidden" name="condition" value="<%= selectedCondition %>"> <% } %>
+                        <% if (selectedManufacturer) { %> <input type="hidden" name="manufacturer" value="<%= selectedManufacturer %>"> <% } %>
+                        <span class="ml-2 font-medium whitespace-nowrap">Erledigte anzeigen</span>
+                    </label>
+                </form>
+
+                <% if (q || selectedTag || selectedCondition || selectedManufacturer) { %>
+                    <a href="<%= baseUrl %><%= showResolved ? '?show_resolved=true' : '' %>" class="inline-flex items-center px-4 py-2 border border-gray-200 text-sm font-medium rounded-xl text-gray-600 bg-white hover:bg-gray-50 transition-colors shadow-sm">
+                        Filter löschen
+                    </a>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Dropdown Filters Bar -->
+        <div class="mb-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Tag Filter -->
+            <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-gray-100 min-w-0">
+                <div class="flex items-center gap-2 shrink-0">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                    <label for="tagFilter" class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Kategorie</label>
+                </div>
+                <select id="tagFilter" onchange="applyFilters('tag', this.value)" class="flex-1 min-w-0 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2 transition-all cursor-pointer truncate">
+                    <option value="">Alle Kategorien</option>
+                    <% allTags.forEach(function(tag) { %>
+                        <option value="<%= tag %>" <%= selectedTag === tag ? 'selected' : '' %>><%= tag %></option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <!-- Condition Filter -->
+            <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-gray-100 min-w-0 <%= currentType !== 'offer' ? 'opacity-50 pointer-events-none' : '' %>">
+                <div class="flex items-center gap-2 shrink-0">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z"></path></svg>
+                    <label for="conditionFilter" class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Zustand</label>
+                </div>
+                <select id="conditionFilter" onchange="applyFilters('condition', this.value)" <%= currentType !== 'offer' ? 'disabled' : '' %> class="flex-1 min-w-0 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2 transition-all cursor-pointer truncate">
+                    <option value="">Alle Zustände</option>
+                    <option value="Neu" <%= selectedCondition === 'Neu' ? 'selected' : '' %>>Neu</option>
+                    <option value="Neuwertig" <%= selectedCondition === 'Neuwertig' ? 'selected' : '' %>>Neuwertig</option>
+                    <option value="Gebraucht" <%= selectedCondition === 'Gebraucht' ? 'selected' : '' %>>Gebraucht</option>
+                    <option value="Defekt" <%= selectedCondition === 'Defekt' ? 'selected' : '' %>>Defekt</option>
+                </select>
+            </div>
+
+            <!-- Manufacturer Filter -->
+            <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-gray-100 min-w-0">
+                <div class="flex items-center gap-2 shrink-0">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    <label for="manufacturerFilter" class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Hersteller</label>
+                </div>
+                <select id="manufacturerFilter" onchange="applyFilters('manufacturer', this.value)" class="flex-1 min-w-0 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2 transition-all cursor-pointer truncate">
+                    <option value="">Alle Hersteller</option>
+                    <% allManufacturers.forEach(function(m) { %>
+                        <option value="<%= m %>" <%= selectedManufacturer === m ? 'selected' : '' %>><%= m %></option>
+                    <% }) %>
+                </select>
+            </div>
+        </div>
+
+        <script>
+            function applyFilters(name, value) {
+                const baseUrl = '<%= baseUrl %>';
+                const params = new URLSearchParams(window.location.search);
+                if (value) {
+                    params.set(name, value);
+                } else {
+                    params.delete(name);
+                }
+                window.location.href = baseUrl + '?' + params.toString();
+            }
+        </script>
+
+        <!-- Grid View -->
+        <div id="gridView" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <% if (listings && listings.length > 0) { %>
+                <% listings.forEach(function(listing) { %>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col cursor-pointer" onclick="window.location.href='/listing/<%= listing.listing_id %>'">
+                        <% if (listing.cover_image) { %>
+                            <div class="h-48 w-full bg-gray-100 relative">
+                                <img src="<%= listing.cover_image %>" alt="<%= listing.title %>" class="w-full h-full object-cover">
+                            </div>
+                        <% } else { %>
+                            <div class="h-48 w-full bg-gray-100 flex items-center justify-center relative">
+                                <svg class="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                        <% } %>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold text-gray-900 mb-1 line-clamp-1">
+                                <%= (listing.quantity && listing.quantity > 1) ? listing.quantity + 'x ' : '' %><%= listing.title %>
+                            </h3>
+                            <% if (listing.condition) { %>
+                                <div class="mb-3">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 uppercase tracking-wide">
+                                        Zustand: <%= listing.condition %>
+                                    </span>
+                                </div>
+                            <% } %>
+                            <p class="text-sm text-gray-500 mb-4 line-clamp-3"><%= listing.description %></p>
+                            <div class="mt-auto flex flex-col gap-2 text-xs text-gray-500 border-t border-gray-100 pt-4">
+                                <div class="flex justify-between items-center">
+                                    <span><%= new Date(listing.created_at).toLocaleDateString('de-DE') %></span>
+                                    <div class="flex items-center gap-2">
+                                        <% if (listing.status === 'reserved') { %>
+                                            <span class="px-1.5 py-0.5 rounded-md bg-yellow-100 text-yellow-800 font-bold text-[10px] uppercase">Reserviert</span>
+                                        <% } %>
+                                        <span class="text-indigo-600 font-medium"><%= listing.user_name || listing.user_email %></span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1 text-gray-400">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                    <span class="truncate"><%= listing.school_name || 'Keine Schule' %></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="col-span-full bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm">
+                    <svg class="mx-auto h-12 w-12 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <p class="text-gray-500 mb-4">Keine <%= currentType === 'offer' ? 'Angebote' : 'Gesuche' %> gefunden.</p>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Table View -->
+        <% 
+            function getSortUrl(column) {
+                let newOrder = 'asc';
+                if (sortBy === column && sortOrder === 'asc') {
+                    newOrder = 'desc';
+                }
+                const params = new URLSearchParams();
+                if (q) params.set('q', q);
+                if (selectedTag) params.set('tag', selectedTag);
+                if (selectedCondition) params.set('condition', selectedCondition);
+                if (selectedManufacturer) params.set('manufacturer', selectedManufacturer);
+                if (showResolved) params.set('show_resolved', 'true');
+                params.set('sort', column);
+                params.set('order', newOrder);
+                return baseUrl + '?' + params.toString();
+            }
+
+            function getSortIcon(column) {
+                if (sortBy !== column) return '<svg class="w-3 h-3 text-gray-300 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>';
+                if (sortOrder === 'asc') return '<svg class="w-3 h-3 text-indigo-600 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
+                return '<svg class="w-3 h-3 text-indigo-600 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+            }
+        %>
+        <div id="tableView" class="hidden overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left">
+                            <a href="<%= getSortUrl('title') %>" class="flex items-center text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-indigo-600 transition-colors">
+                                Titel <%- getSortIcon('title') %>
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left">
+                            <a href="<%= getSortUrl('created_at') %>" class="flex items-center text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-indigo-600 transition-colors">
+                                Datum <%- getSortIcon('created_at') %>
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left">
+                            <a href="<%= getSortUrl('school_name') %>" class="flex items-center text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-indigo-600 transition-colors">
+                                Schule <%- getSortIcon('school_name') %>
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left">
+                            <a href="<%= getSortUrl('user_name') %>" class="flex items-center text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-indigo-600 transition-colors">
+                                Von <%- getSortIcon('user_name') %>
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Aktion</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% if (listings && listings.length > 0) { %>
+                        <% listings.forEach(function(listing) { %>
+                            <tr class="hover:bg-gray-50 cursor-pointer transition-colors" onclick="window.location.href='/listing/<%= listing.listing_id %>'">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 max-w-xs truncate">
+                                    <div class="flex items-center gap-2">
+                                        <%= (listing.quantity && listing.quantity > 1) ? listing.quantity + 'x ' : '' %><%= listing.title %>
+                                        <% if (listing.status === 'reserved') { %>
+                                            <span class="px-1.5 py-0.5 rounded-md bg-yellow-100 text-yellow-800 text-[10px] font-bold uppercase">Res.</span>
+                                        <% } %>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <%= new Date(listing.created_at).toLocaleDateString('de-DE') %>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <%= listing.school_name || '-' %>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <%= listing.user_name || listing.user_email %>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="/listing/<%= listing.listing_id %>" class="text-indigo-600 hover:text-indigo-900">Details &rarr;</a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">Keine <%= currentType === 'offer' ? 'Angebote' : 'Gesuche' %> gefunden.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        function setView(view) {
+            localStorage.setItem('listingsView', view);
+            const gridView = document.getElementById('gridView');
+            const tableView = document.getElementById('tableView');
+            const btnGrid = document.getElementById('btnGrid');
+            const btnTable = document.getElementById('btnTable');
+
+            if (view === 'grid') {
+                gridView.classList.remove('hidden');
+                tableView.classList.add('hidden');
+                btnGrid.classList.add('bg-gray-100', 'text-gray-700');
+                btnGrid.classList.remove('bg-white', 'text-gray-400');
+                btnTable.classList.add('bg-white', 'text-gray-400');
+                btnTable.classList.remove('bg-gray-100', 'text-gray-700');
+            } else {
+                gridView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                btnGrid.classList.add('bg-white', 'text-gray-400');
+                btnGrid.classList.remove('bg-gray-100', 'text-gray-700');
+                btnTable.classList.add('bg-gray-100', 'text-gray-700');
+                btnTable.classList.remove('bg-white', 'text-gray-400');
+            }
+        }
+
+        // Initialize view on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedView = localStorage.getItem('listingsView') || 'grid';
+            setView(savedView);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein Profil - SchoolTechShare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+    <%- include('partials/navbar', { activePage: 'profile' }) %>
+
+    <main class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Mein Profil</h1>
+            <p class="text-gray-500 mt-2">Verwalten Sie Ihre persönlichen Daten und Kontoeinstellungen.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: User Info & Details -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- General Info Form -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                        <h2 class="text-lg font-bold text-gray-900">Persönliche Informationen</h2>
+                    </div>
+                    <div class="p-6">
+                        <% 
+                            let queryParams = new URLSearchParams();
+                            if (typeof success !== 'undefined' && success) queryParams.set('success', success);
+                        %>
+                        
+                        <% if (typeof error !== 'undefined' && error) { %>
+                            <div class="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+                                <%= error %>
+                            </div>
+                        <% } %>
+
+                        <form action="/profile/update" method="POST" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="name" class="block text-sm font-semibold text-gray-700">Vollständiger Name</label>
+                                    <input type="text" name="name" id="name" value="<%= user.name || '' %>" required
+                                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-sm font-semibold text-gray-700">E-Mail Adresse</label>
+                                    <input type="email" id="email" value="<%= user.email %>" disabled
+                                        class="mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 shadow-sm text-gray-500 sm:text-sm cursor-not-allowed">
+                                    <p class="mt-1 text-[10px] text-gray-400 italic">Die E-Mail Adresse kann nur durch Administratoren geändert werden.</p>
+                                </div>
+                                <div>
+                                    <label for="phone_number" class="block text-sm font-semibold text-gray-700">Telefonnummer</label>
+                                    <input type="text" name="phone_number" id="phone_number" value="<%= user.phone_number || '' %>"
+                                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Rolle</label>
+                                    <div class="mt-2.5">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200 uppercase tracking-wider">
+                                            <%= user.role === 'admin' ? 'Administrator' : 'Benutzer' %>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 flex justify-end">
+                                <button type="submit" class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-6 text-sm font-bold text-white shadow-sm hover:bg-indigo-700 focus:outline-none transition-colors uppercase tracking-wider">
+                                    Speichern
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Schools Info -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                        <h2 class="text-lg font-bold text-gray-900">Zugeordnete Schulen</h2>
+                    </div>
+                    <div class="p-6">
+                        <% if (userSchools && userSchools.length > 0) { %>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <% userSchools.forEach(function(school) { %>
+                                    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div class="bg-indigo-100 p-2 rounded-lg">
+                                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-bold text-gray-900"><%= school.name %></p>
+                                            <p class="text-xs text-gray-500"><%= school.city %></p>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-sm text-gray-500 italic">Sie sind momentan keiner Schule zugewiesen.</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Password Change -->
+            <div class="space-y-8">
+                <div class="bg-white rounded-xl shadow-lg border border-indigo-100 overflow-hidden">
+                    <div class="bg-indigo-600 px-6 py-4">
+                        <h2 class="text-lg font-bold text-white">Passwort ändern</h2>
+                    </div>
+                    <div class="p-6">
+                        <!-- Dynamic Status Messages based on URL Parameters -->
+                        <div id="status-container"></div>
+                        <script>
+                            const params = new URLSearchParams(window.location.search);
+                            const container = document.getElementById('status-container');
+                            
+                            if (params.get('success') === 'profile') {
+                                container.innerHTML = '<div class="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md text-sm">Profil erfolgreich aktualisiert.</div>';
+                            } else if (params.get('success') === 'password') {
+                                container.innerHTML = '<div class="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md text-sm">Passwort erfolgreich geändert.</div>';
+                            } else if (params.get('error')) {
+                                let msg = 'Ein Fehler ist aufgetreten.';
+                                if (params.get('error') === 'match') msg = 'Die neuen Passwörter stimmen nicht überein.';
+                                if (params.get('error') === 'current') msg = 'Das aktuelle Passwort ist falsch.';
+                                container.innerHTML = `<div class="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">${msg}</div>`;
+                            }
+                        </script>
+
+                        <form action="/profile/password" method="POST" class="space-y-4">
+                            <div>
+                                <label for="current_password" class="block text-sm font-semibold text-gray-700">Aktuelles Passwort</label>
+                                <input type="password" name="current_password" id="current_password" required
+                                    class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                            <hr class="border-gray-100 my-4">
+                            <div>
+                                <label for="new_password" class="block text-sm font-semibold text-gray-700">Neues Passwort</label>
+                                <input type="password" name="new_password" id="new_password" required
+                                    class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="confirm_password" class="block text-sm font-semibold text-gray-700">Bestätigen</label>
+                                <input type="password" name="confirm_password" id="confirm_password" required
+                                    class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                            <div class="pt-4">
+                                <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-bold text-white shadow-sm hover:bg-indigo-700 focus:outline-none transition-colors uppercase tracking-wider">
+                                    Aktualisieren
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

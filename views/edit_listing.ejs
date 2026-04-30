@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserat bearbeiten - SchoolTechShare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+    <%- include('partials/navbar', { activePage: 'listings' }) %>
+
+    <main class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="bg-indigo-600 py-6 px-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Inserat bearbeiten</h1>
+                    <p class="text-indigo-100 mt-2">Passe dein Inserat an oder verwalte die hochgeladenen Fotos.</p>
+                </div>
+            </div>
+            
+            <form action="/listing/<%= listing.listing_id %>/edit" method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
+                
+                <% if (error) { %>
+                    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <!-- Text & Metadata Section -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Allgemeine Informationen</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Type Selection -->
+                        <div class="flex-1">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Inseratstyp</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 flex-1 transition-colors">
+                                    <input type="radio" name="type" value="offer" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" <%= listing.type === 'offer' ? 'checked' : '' %> onchange="toggleCondition(this.value)">
+                                    <span class="ml-2 font-medium text-gray-900 text-sm">Angebot</span>
+                                </label>
+                                <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 flex-1 transition-colors">
+                                    <input type="radio" name="type" value="request" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" <%= listing.type === 'request' ? 'checked' : '' %> onchange="toggleCondition(this.value)">
+                                    <span class="ml-2 font-medium text-gray-900 text-sm">Suche</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Condition (Only for Offers) -->
+                        <div id="condition-container" class="flex-1 <%= listing.type === 'offer' ? '' : 'hidden' %>">
+                            <label for="condition" class="block text-sm font-semibold text-gray-700 mb-2">Zustand der Hardware</label>
+                            <select name="condition" id="condition" class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-shadow">
+                                <option value="Gebraucht" <%= listing.condition === 'Gebraucht' ? 'selected' : '' %>>Gebraucht</option>
+                                <option value="Neu" <%= listing.condition === 'Neu' ? 'selected' : '' %>>Neu</option>
+                                <option value="Neuwertig" <%= listing.condition === 'Neuwertig' ? 'selected' : '' %>>Neuwertig</option>
+                                <option value="Defekt" <%= listing.condition === 'Defekt' ? 'selected' : '' %>>Defekt / Ersatzteilspender</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <script>
+                        function toggleCondition(type) {
+                            const container = document.getElementById('condition-container');
+                            if (type === 'offer') {
+                                container.classList.remove('hidden');
+                            } else {
+                                container.classList.add('hidden');
+                            }
+                        }
+                    </script>
+
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
+                        <!-- Quantity -->
+                        <div class="md:col-span-1">
+                            <label for="quantity" class="block text-sm font-semibold text-gray-700">Anzahl</label>
+                            <input type="number" name="quantity" id="quantity" min="1" required value="<%= listing.quantity || 1 %>" class="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <!-- Title -->
+                        <div class="md:col-span-3">
+                            <label for="title" class="block text-sm font-semibold text-gray-700">Titel</label>
+                            <input type="text" name="title" id="title" required value="<%= listing.title %>" class="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <!-- Manufacturer -->
+                        <div class="md:col-span-2">
+                            <label for="manufacturer" class="block text-sm font-semibold text-gray-700">Hersteller</label>
+                            <input type="text" name="manufacturer" id="manufacturer" value="<%= listing.manufacturer || '' %>" class="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="description" class="block text-sm font-semibold text-gray-700">Beschreibung</label>
+                        <textarea name="description" id="description" rows="5" class="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"><%= listing.description %></textarea>
+                    </div>
+
+                    <!-- Tags Selection -->
+                    <div class="pt-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Hardware-Kategorien (Tags)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-64 overflow-y-auto p-4 border border-gray-200 rounded-lg bg-gray-50">
+                            <% allTags.forEach(function(tagObj) { %>
+                                <label class="flex items-center space-x-3 p-2 rounded-md hover:bg-white transition-colors cursor-pointer border border-transparent hover:border-gray-100">
+                                    <input type="checkbox" name="tags" value="<%= tagObj.name %>" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" <%= tags.includes(tagObj.name) ? 'checked' : '' %>>
+                                    <span class="text-sm text-gray-700"><%= tagObj.name %></span>
+                                </label>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photos Section -->
+                <div class="space-y-6 pt-4">
+                    <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Fotos verwalten (Maximal 5 insgesamt)</h3>
+                    
+                    <% if (images && images.length > 0) { %>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <p class="text-sm text-gray-600 mb-4">Hier siehst du deine bereits hochgeladenen Fotos. Wähle ein Hauptbild aus oder markiere Fotos, die gelöscht werden sollen.</p>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                <% images.forEach(function(img) { %>
+                                    <div class="relative bg-white border border-gray-300 rounded-lg overflow-hidden group">
+                                        <img src="<%= img.file_path %>" class="w-full h-32 object-cover transition-opacity" id="img-<%= img.image_id %>">
+                                        
+                                        <!-- Actions Bar -->
+                                        <div class="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-gray-200 p-2 space-y-2">
+                                            <!-- Main Image Radio -->
+                                            <label class="flex items-center text-xs text-gray-700 cursor-pointer">
+                                                <input type="radio" name="main_image_id" value="<%= img.image_id %>" class="h-3 w-3 text-indigo-600 focus:ring-indigo-500" <%= img.is_main ? 'checked' : '' %>>
+                                                <span class="ml-1 font-medium">Als Hauptbild</span>
+                                            </label>
+                                            
+                                            <!-- Delete Checkbox -->
+                                            <label class="flex items-center text-xs text-red-600 cursor-pointer">
+                                                <input type="checkbox" name="delete_images[]" value="<%= img.image_id %>" class="h-3 w-3 text-red-600 focus:ring-red-500 rounded" onchange="document.getElementById('img-<%= img.image_id %>').style.opacity = this.checked ? '0.3' : '1'">
+                                                <span class="ml-1 font-bold">Löschen</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <!-- Upload Additional Photos -->
+                    <div class="pt-2">
+                        <label for="photos" class="block text-sm font-semibold text-gray-700 mb-2">Weitere Fotos hinzufügen</label>
+                        <div class="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6 hover:bg-gray-50 transition-colors">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600 justify-center">
+                                    <label for="photos" class="relative cursor-pointer rounded-md bg-transparent font-medium text-indigo-600 focus-within:outline-none hover:text-indigo-500">
+                                        <span>Dateien auswählen</span>
+                                        <input id="photos" name="photos" type="file" multiple accept="image/*" class="sr-only" onchange="updateFileList(this)">
+                                    </label>
+                                </div>
+                                <p class="text-xs text-gray-500">PNG, JPG bis zu 5MB</p>
+                            </div>
+                        </div>
+                        <ul id="file-list" class="mt-2 text-sm text-gray-600 space-y-1 pl-2 list-disc hidden"></ul>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="pt-6 flex justify-end gap-3 border-t border-gray-100 mt-8">
+                    <a href="/listing/<%= listing.listing_id %>" class="px-6 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors uppercase tracking-wider">
+                        Abbrechen
+                    </a>
+                    <button type="submit" class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
+                        Änderungen speichern
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function updateFileList(input) {
+            const list = document.getElementById('file-list');
+            list.innerHTML = '';
+            
+            // Note: client-side limit check; server will also validate
+            const existingCount = <%= images ? images.length : 0 %>;
+            if (existingCount + input.files.length > 5) {
+                alert('Zusammen mit deinen bestehenden Bildern würdest du das Limit von 5 überschreiten. Bitte lösche erst alte Bilder oder wähle weniger neue aus.');
+                input.value = ''; // Clear selection
+                list.classList.add('hidden');
+                return;
+            }
+
+            if (input.files.length > 0) {
+                list.classList.remove('hidden');
+                Array.from(input.files).forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = file.name;
+                    list.appendChild(li);
+                });
+            } else {
+                list.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

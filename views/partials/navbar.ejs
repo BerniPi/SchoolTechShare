@@ -1,0 +1,56 @@
+<!-- Navbar -->
+<nav class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex items-center">
+                <a href="/offers"
+                    class="text-2xl font-bold text-indigo-600 hover:text-indigo-800 transition-colors">SchoolTechShare</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <% if (typeof user !=='undefined' && user) { %>
+                    <span class="text-sm text-gray-500 hidden sm:inline">Willkommen, <%= user.role==='admin'
+                            ? 'Administrator' : 'Benutzer' %></span>
+                    <a href="/offers"
+                        class="text-sm font-medium <%= typeof activePage !== 'undefined' && activePage === 'offers' ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1 font-bold' : 'text-gray-600 hover:text-gray-900' %> transition-colors">Angebote</a>
+                    <a href="/requests"
+                        class="text-sm font-medium <%= typeof activePage !== 'undefined' && activePage === 'requests' ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1 font-bold' : 'text-gray-600 hover:text-gray-900' %> transition-colors">Suchen</a>
+
+                    <% if (user.role==='admin' ) { %>
+                        <div class="relative group h-full flex items-center">
+                            <button
+                                class="text-sm font-medium <%= (typeof activePage !== 'undefined' && ['schools', 'users', 'tags'].includes(activePage)) ? 'text-indigo-600 font-bold' : 'text-gray-600' %> hover:text-gray-900 flex items-center gap-1 transition-colors h-full px-2">
+                                Admin
+                                <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div
+                                class="absolute top-full left-0 w-48 bg-white border border-gray-200 rounded-b-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 py-2">
+                                <a href="/admin/schools"
+                                    class="block px-4 py-2.5 text-sm <%= activePage === 'schools' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' %>">Schulen
+                                    verwalten</a>
+                                <a href="/admin/users"
+                                    class="block px-4 py-2.5 text-sm <%= activePage === 'users' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' %>">Benutzer
+                                    verwalten</a>
+                                <a href="/admin/tags"
+                                    class="block px-4 py-2.5 text-sm <%= activePage === 'tags' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' %>">Tags
+                                    verwalten</a>
+                            </div>
+                        </div>
+                        <% } %>
+                            <a href="/profile"
+                                class="text-sm font-medium <%= typeof activePage !== 'undefined' && activePage === 'profile' ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1 font-bold' : 'text-gray-600 hover:text-gray-900' %> transition-colors">Profil</a>
+                            <form action="/logout" method="POST" class="inline">
+                                <button type="submit"
+                                    class="text-sm text-red-600 hover:text-red-800 font-medium">Abmelden</button>
+                            </form>
+                            <% } else { %>
+                                <a href="/login"
+                                    class="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">Anmelden</a>
+                                <% } %>
+            </div>
+        </div>
+    </div>
+</nav>

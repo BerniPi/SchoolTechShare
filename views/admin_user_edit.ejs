@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benutzer bearbeiten - SchoolTechShare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+    <%- include('partials/navbar', { activePage: 'users' }) %>
+
+    <main class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <div class="mb-6">
+            <a href="/admin/users" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Zurück zur Benutzerverwaltung
+            </a>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="bg-indigo-600 py-6 px-8">
+                <h1 class="text-2xl font-bold text-white">Benutzer bearbeiten</h1>
+                <p class="text-indigo-100 mt-2">Passen Sie die Details und Schulzuweisungen dieses Benutzers an.</p>
+            </div>
+            
+            <div class="p-8">
+                <% if (error) { %>
+                    <div class="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <form action="/admin/users/<%= targetUser.user_id %>/edit" method="POST" class="space-y-6">
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <!-- Name -->
+                        <div>
+                            <label for="name" class="block text-sm font-semibold text-gray-700">Name</label>
+                            <input type="text" name="name" id="name" value="<%= targetUser.name || '' %>" placeholder="Max Mustermann" class="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-shadow">
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label for="email" class="block text-sm font-semibold text-gray-700">E-Mail-Adresse</label>
+                            <input type="email" name="email" id="email" value="<%= targetUser.email %>" required class="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-shadow">
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label for="phone_number" class="block text-sm font-semibold text-gray-700">Telefonnummer (Optional)</label>
+                        <input type="text" name="phone_number" id="phone_number" value="<%= targetUser.phone_number || '' %>" class="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-shadow">
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-6">
+                        <label class="block text-sm font-semibold text-gray-900 mb-4">Rollen & Berechtigungen</label>
+                        <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+                            <label class="flex items-center">
+                                <input type="radio" name="role" value="user" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" <%= targetUser.role === 'user' ? 'checked' : '' %>>
+                                <span class="ml-3 block text-sm font-medium text-gray-700">Standard-Benutzer</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="role" value="admin" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" <%= targetUser.role === 'admin' ? 'checked' : '' %>>
+                                <span class="ml-3 block text-sm font-medium text-gray-700">Administrator</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-6">
+                        <label class="block text-sm font-semibold text-gray-900 mb-4">Zugewiesene Schulen</label>
+                        <div class="mt-2 space-y-2 border border-gray-300 rounded-md p-4 bg-gray-50 max-h-60 overflow-y-auto">
+                            <% if (schools && schools.length > 0) { %>
+                                <% schools.forEach(function(school) { %>
+                                    <label class="flex items-center p-2 hover:bg-gray-100 rounded transition-colors">
+                                        <input type="checkbox" name="school_ids[]" value="<%= school.school_id %>" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" <%= assignedSchoolIds.includes(school.school_id) ? 'checked' : '' %>>
+                                        <span class="ml-3 text-sm font-medium text-gray-700"><%= school.name %> (<%= school.school_code %>)</span>
+                                    </label>
+                                <% }) %>
+                            <% } else { %>
+                                <p class="text-sm text-gray-500">Keine Schulen im System gefunden.</p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 flex justify-end gap-3 border-t border-gray-200">
+                        <a href="/admin/users" class="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
+                            Abbrechen
+                        </a>
+                        <button type="submit" class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
+                            Änderungen speichern
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benutzer verwalten - SchoolTechShare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+    <%- include('partials/navbar', { activePage: 'users' }) %>
+
+    <main class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Benutzer verwalten</h1>
+                <p class="mt-2 text-sm text-gray-600">Eine Übersicht aller registrierten und eingeladenen Benutzer.</p>
+            </div>
+            <a href="/admin/invite" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Neuen Benutzer einladen
+            </a>
+        </div>
+
+        <% if (error) { %>
+            <div class="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <% if (typeof successLink !== 'undefined' && successLink) { %>
+            <div class="mb-6 bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-4 rounded-md text-sm shadow-sm">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="font-medium">Passwort-Rücksetz-Link wurde erstellt:</p>
+                        <p class="mt-1 break-all">
+                            <a href="<%= successLink %>" class="font-bold underline"><%= successLink %></a>
+                        </p>
+                        <p class="mt-2 text-xs opacity-75">Kopieren Sie diesen Link und senden Sie ihn dem Benutzer.</p>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name / E-Mail</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rolle</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zugewiesene Schulen</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Aktionen</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <% if (users && users.length > 0) { %>
+                            <% users.forEach(function(u) { %>
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900"><%= u.name || '---' %></div>
+                                        <div class="text-sm text-gray-500"><%= u.email %></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800' %>">
+                                            <%= u.role === 'admin' ? 'Administrator' : 'Benutzer' %>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="<%= u.school_names || 'Keine' %>">
+                                        <%= u.school_names || 'Keine Schule zugewiesen' %>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <% if (u.invite_token) { %>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                Einladung offen
+                                            </span>
+                                        <% } else { %>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                Aktiv
+                                            </span>
+                                        <% } %>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center justify-end gap-4">
+                                            <form action="/admin/users/<%= u.user_id %>/reset-password" method="POST" class="inline">
+                                                <button type="submit" class="text-indigo-600 hover:text-indigo-900" title="Passwort Rücksetz-Link generieren">
+                                                    Passwort zurücksetzen
+                                                </button>
+                                            </form>
+                                            <a href="/admin/users/<%= u.user_id %>/edit" class="text-gray-600 hover:text-gray-900">Bearbeiten</a>
+                                            <form action="/admin/users/<%= u.user_id %>/delete" method="POST" class="inline" onsubmit="return confirm('Möchten Sie diesen Benutzer wirklich löschen?');">
+                                                <button type="submit" class="text-red-600 hover:text-red-900">Löschen</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">Keine Benutzer gefunden.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
