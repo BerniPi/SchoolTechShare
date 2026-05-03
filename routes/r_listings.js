@@ -139,7 +139,7 @@ router.get('/listing/new', (req, res) => {
         if (err) schools = [];
         db.all(`SELECT * FROM tags ORDER BY name ASC`, (err, allTags) => {
             if (err) allTags = [];
-            res.render('create_listing', { schools, user: req.user, allTags });
+            res.render('create_listing', { schools, user: req.user, allTags, type: req.query.type });
         });
     });
 });

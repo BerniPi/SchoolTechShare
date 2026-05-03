@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
+const multer = require('multer');
+const XLSX = require('xlsx');
 const { db } = require('../database');
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Middleware to ensure user is admin
 router.use((req, res, next) => {
@@ -100,6 +104,49 @@ router.post('/schools', (req, res) => {
         }
         res.redirect('/admin/schools');
     });
+});
+
+// POST import schools from Excel
+router.post('/schools/import', upload.single('excel_file'), (req, res) => {
+    if (!req.file) {
+        return res.redirect('/admin/schools');
+    }
+
+    try {
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(worksheet);
+
+        if (data.length === 0) {
+            return res.redirect('/admin/schools');
+        }
+
+        const insertSql = `INSERT OR IGNORE INTO schools (school_code, name, address, city) VALUES (?, ?, ?, ?)`;
+        const stmt = db.prepare(insertSql);
+
+        db.serialize(() => {
+            db.run('BEGIN TRANSACTION');
+            data.forEach(row => {
+                const schoolCode = row['Schulkennzahl'] || row['schulkennzahl'];
+                const name = row['Name'] || row['name'];
+                const address = row['Adresse'] || row['adresse'];
+                const city = row['Stadt'] || row['stadt'];
+
+                if (schoolCode && name) {
+                    stmt.run([String(schoolCode), String(name), address ? String(address) : null, city ? String(city) : null]);
+                }
+            });
+            stmt.finalize();
+            db.run('COMMIT', (err) => {
+                if (err) console.error('Import Error:', err);
+                res.redirect('/admin/schools');
+            });
+        });
+    } catch (error) {
+        console.error('Excel Parsing Error:', error);
+        res.redirect('/admin/schools');
+    }
 });
 
 // GET edit school

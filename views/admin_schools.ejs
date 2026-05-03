@@ -73,6 +73,27 @@
                                 </form>
                     </div>
                 </div>
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mt-8">
+                    <div class="bg-emerald-600 py-4 px-6">
+                        <h2 class="text-lg font-bold text-white">Schulen importieren</h2>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-xs text-gray-500 mb-4">Laden Sie eine Excel-Datei (.xlsx) hoch. Erforderliche Spalten: <strong>Schulkennzahl, Name, Adresse, Stadt</strong></p>
+                        <form action="/admin/schools/import" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <div>
+                                <label for="excel_file" class="block text-sm font-semibold text-gray-700">Excel-Datei auswählen</label>
+                                <input type="file" name="excel_file" id="excel_file" accept=".xlsx, .xls, .csv" required
+                                    class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-all">
+                            </div>
+                            <div class="pt-2">
+                                <button type="submit"
+                                    class="w-full flex justify-center rounded-md border border-transparent bg-emerald-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors">
+                                    Import starten
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <!-- Schools List -->
