@@ -1,24 +1,30 @@
-# Use Node 18 slim as base image
-FROM node:18-slim
+# Nutze Node 20 (vollständige Version)
+FROM node:20
 
-# Create app directory
+# Erstelle App-Verzeichnis
 WORKDIR /usr/src/app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# Installiere notwendige Build-Tools für native Module (sqlite3, bcrypt)
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Kopiere Package-Dateien
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm install --production
+# Installiere Abhängigkeiten für Produktion und baue sqlite3 aus dem Quellcode
+RUN npm install --production --build-from-source=sqlite3
 
-# Bundle app source
+# Kopiere den Rest des Quellcodes
 COPY . .
 
-# Ensure the uploads directory exists
+# Verzeichnis für Uploads sicherstellen
 RUN mkdir -p public/uploads
 
-# Expose port 3000
-EXPOSE 3000
+# Port freigeben
+EXPOSE 3001
 
-# Start the application
+# Startbefehl
 CMD ["node", "index.js"]

@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   app:
     build: .
     container_name: schooltechshare
     ports:
-      - "3000:3000"
+      - 3001:3001
     volumes:
       # Persist the SQLite database
       - ./database.sqlite:/usr/src/app/database.sqlite
@@ -13,7 +11,7 @@ services:
       - ./public/uploads:/usr/src/app/public/uploads
     environment:
       - NODE_ENV=production
-      - PORT=3000
-      - ADMIN_EMAIL=admin@example.com
-      - ADMIN_PASSWORD=dein_sicheres_passwort
+      - PORT=3001
+      - ADMIN_EMAIL=admin@schooltechshare.local
+      - ADMIN_PASSWORD=Blumenstrasse4
     restart: always
